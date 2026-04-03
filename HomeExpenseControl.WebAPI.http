@@ -1,0 +1,6 @@
+@HomeExpenseControl.WebAPI_HostAddress = http://localhost:5175
+
+GET {{HomeExpenseControl.WebAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
