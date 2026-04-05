@@ -4,7 +4,7 @@ using HomeExpenseControl.WebAPI.Models;
 using HomeExpenseControl.WebAPI.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace HomeExpenseControl.WebAPI.Services;
+namespace HomeExpenseControl.WebAPI.Services.Interfaces;
 
 public class CategoryService : ICategoryService
 {
