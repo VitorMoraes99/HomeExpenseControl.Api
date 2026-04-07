@@ -2,10 +2,16 @@ using HomeExpenseControl.WebAPI.Data;
 using HomeExpenseControl.WebAPI.Services;
 using HomeExpenseControl.WebAPI.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization; // <-- Adicionado para a conversão do Enum
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+// Ajustado para aceitar Enums como texto ("despesa", "receita") em vez de números
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -36,7 +42,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
 app.UseCors("AllowAll");
 app.UseAuthorization();
 app.MapControllers();
