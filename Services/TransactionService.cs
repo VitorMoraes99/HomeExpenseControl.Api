@@ -4,7 +4,7 @@ using HomeExpenseControl.WebAPI.Models;
 using HomeExpenseControl.WebAPI.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace HomeExpenseControl.WebAPI.Services.Interfaces;
+namespace HomeExpenseControl.WebAPI.Services;
 
 public class TransactionService : ITransactionService
 {
@@ -18,37 +18,18 @@ public class TransactionService : ITransactionService
     public async Task<IEnumerable<TransactionResponseDto>> GetAllAsync()
     {
         var transactions = await _context.Transactions.ToListAsync();
-        
         return transactions.Select(t => new TransactionResponseDto(
-            t.Id, t.Description, t.Amount, t.Type, t.CategoryId, t.PersonId));
+            t.Id, 
+            t.Description, 
+            t.Amount, 
+            t.Type, 
+            t.CategoryId, 
+            t.PersonId
+        ));
     }
 
     public async Task<TransactionResponseDto> CreateAsync(CreateTransactionDto dto)
     {
-        if (dto.Amount <= 0)
-            throw new ArgumentException("The transaction amount must be greater than zero.");
-
-        var person = await _context.People.FindAsync(dto.PersonId) 
-            ?? throw new ArgumentException("Person not found.");
-            
-        var category = await _context.Categories.FindAsync(dto.CategoryId) 
-            ?? throw new ArgumentException("Category not found.");
-
-        if (person.Age < 18 && dto.Type != TransactionType.Expense)
-        {
-            throw new ArgumentException("Minors under 18 can only register expenses.");
-        }
-
-        if (dto.Type == TransactionType.Expense && category.Purpose == CategoryPurpose.Income)
-        {
-            throw new ArgumentException("Cannot use an Income category for an Expense transaction.");
-        }
-        
-        if (dto.Type == TransactionType.Income && category.Purpose == CategoryPurpose.Expense)
-        {
-            throw new ArgumentException("Cannot use an Expense category for an Income transaction.");
-        }
-
         var transaction = new Transaction
         {
             Description = dto.Description,
@@ -62,6 +43,37 @@ public class TransactionService : ITransactionService
         await _context.SaveChangesAsync();
 
         return new TransactionResponseDto(
-            transaction.Id, transaction.Description, transaction.Amount, transaction.Type, transaction.CategoryId, transaction.PersonId);
+            transaction.Id, 
+            transaction.Description, 
+            transaction.Amount, 
+            transaction.Type, 
+            transaction.CategoryId, 
+            transaction.PersonId
+        );
+    }
+
+    public async Task<bool> UpdateAsync(int id, CreateTransactionDto dto)
+    {
+        var transaction = await _context.Transactions.FindAsync(id);
+        if (transaction == null) return false;
+
+        transaction.Description = dto.Description;
+        transaction.Amount = dto.Amount;
+        transaction.Type = dto.Type;
+        transaction.CategoryId = dto.CategoryId;
+        transaction.PersonId = dto.PersonId;
+
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> DeleteAsync(int id)
+    {
+        var transaction = await _context.Transactions.FindAsync(id);
+        if (transaction == null) return false;
+
+        _context.Transactions.Remove(transaction);
+        await _context.SaveChangesAsync();
+        return true;
     }
 }

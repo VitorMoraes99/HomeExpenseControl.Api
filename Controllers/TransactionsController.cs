@@ -1,6 +1,8 @@
 using HomeExpenseControl.WebAPI.DTOs;
 using HomeExpenseControl.WebAPI.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Threading.Tasks;
 
 namespace HomeExpenseControl.WebAPI.Controllers;
 
@@ -32,7 +34,36 @@ public class TransactionsController : ControllerBase
         }
         catch (ArgumentException ex)
         {
-            return BadRequest(new { Error = ex.Message }); 
+            return BadRequest(new { message = ex.Message }); 
         }
+    }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(int id, [FromBody] CreateTransactionDto dto)
+    {
+        try
+        {
+            var updated = await _transactionService.UpdateAsync(id, dto);
+            
+            if (!updated) 
+                return NotFound(new { message = "Transação não encontrada." });
+                
+            return NoContent();
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var deleted = await _transactionService.DeleteAsync(id);
+        
+        if (!deleted) 
+            return NotFound(new { message = "Transação não encontrada." });
+            
+        return NoContent();
     }
 }
