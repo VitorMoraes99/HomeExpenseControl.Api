@@ -26,6 +26,28 @@ public class CategoriesController : ControllerBase
     public async Task<IActionResult> Create([FromBody] CreateCategoryDto dto)
     {
         var category = await _categoryService.CreateAsync(dto);
-        return Ok(category); // Usando Ok para simplificar, mas Created seria o ideal também
+        return Ok(category); 
+    }
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(int id, [FromBody] CreateCategoryDto dto)
+    {
+        try
+        {
+            var updated = await _categoryService.UpdateAsync(id, dto);
+            if (!updated) return NotFound(new { message = "Categoria não encontrada." });
+            return NoContent();
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var deleted = await _categoryService.DeleteAsync(id);
+        if (!deleted) return NotFound(new { message = "Categoria não encontrada." });
+        return NoContent();
     }
 }
